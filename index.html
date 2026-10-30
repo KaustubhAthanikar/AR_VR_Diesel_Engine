@@ -28,10 +28,10 @@ button:hover,button:focus-visible{border-color:var(--hot);outline:none}button.on
 #msg{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:var(--mu);font-size:14px}
 </style></head><body>
 <video id="cam" playsinline muted></video><canvas id="c"></canvas>
-<div class="top"><h1>Twin-cylinder <span>diesel engine</span></h1><div class="sub">Mechanical Engineering Lab, COEP Tech, Pune. Drag to rotate, pinch to zoom, drag with two fingers (or press Move) to reposition, tap a part to read about it.</div><div id="st" style="margin-top:10px;font:12px Consolas,monospace;color:var(--tx);line-height:1.6"></div></div>
+<div class="top"><h1>Twin-cylinder <span>diesel engine</span></h1><div id="st" style="margin-top:10px;font:12px Consolas,monospace;color:var(--tx);line-height:1.6"></div></div>
 <div id="name"></div><div id="msg">Loading 3D…</div>
 <div class="dock"><div class="r"><span style="font-size:12px;color:var(--mu)">Assembled</span><input id="ex" type="range" min="0" max="100" value="0" aria-label="Explode"><span style="font-size:12px;color:var(--mu)">Exploded</span></div>
-<div class="r" style="margin-top:8px;flex-wrap:wrap"><button id="bRun" class="on">Stop engine</button><input id="rpm" type="range" min="5" max="100" value="30" style="flex:none;width:120px" aria-label="Engine speed"><button id="bMv">Move: off</button><button id="bCut">Cut view</button><button id="bAR">AR: place on table</button><button id="bCam">Camera view</button><button id="bSp">Auto-spin</button><button id="bRe">Reset</button><button id="bIn">About engine</button></div>
+<div class="r" style="margin-top:8px;flex-wrap:wrap"><button id="bRun" class="on">Stop engine</button><input id="rpm" type="range" min="5" max="100" value="30" style="flex:none;width:120px" aria-label="Engine speed"><button id="bMv">Move: off</button><button id="bCut">Cut view</button><button id="bCam">Camera view</button><button id="bSp">Auto-spin</button><button id="bRe">Reset</button><button id="bIn">About engine</button></div>
 <div id="chips"></div></div>
 <svg id="ln" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;display:none"><defs><marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#c8501e"/></marker></defs><line id="l1" stroke="#c8501e" stroke-width="1.8" marker-end="url(#ar)"/></svg>
 <div id="co"><b id="ct"></b><p id="cd"></p></div><aside id="in" aria-label="About the engine"><button id="xIn" style="float:right">Close</button>
@@ -140,20 +140,6 @@ $('bCam').onclick=async e=>{if(mode==='cam'){vid.srcObject.getTracks().forEach(k
  try{vid.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});await vid.play();vid.style.display='block';studio(false);holder.scale.setScalar(.8);mode='cam';e.target.classList.add('on')}catch(err){alert('Camera blocked. Allow camera access and open this page over https.')}};
 // WebXR table AR (Android Chrome with ARCore)
 let xrSrc=null;const reticle=new THREE.Mesh(new THREE.RingGeometry(.12,.16,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xff7a1a}));reticle.matrixAutoUpdate=false;reticle.visible=false;scene.add(reticle);
-const arui=document.createElement('div');arui.innerHTML='<div id="art" style="margin-bottom:8px">Move your phone slowly over a flat surface, then tap the ring to place the engine.</div><button id="a1">Smaller</button> <button id="a2">Larger</button> <button id="a3">Exit AR</button>';
-arui.style.cssText='position:fixed;left:0;right:0;bottom:0;padding:14px;display:none;text-align:center;color:#fff;font:14px system-ui,sans-serif;background:linear-gradient(transparent,rgba(0,0,0,.65))';document.body.appendChild(arui);
-arui.addEventListener('beforexrselect',e=>e.preventDefault());let xrS=null,arScale=.1;
-$('a1').onclick=()=>{arScale*=.8;holder.scale.setScalar(arScale)};$('a2').onclick=()=>{arScale*=1.25;holder.scale.setScalar(arScale)};$('a3').onclick=()=>xrS&&xrS.end();
-$('bAR').onclick=async()=>{try{
- if(!navigator.xr||!await navigator.xr.isSessionSupported('immersive-ar')){alert('Table AR needs Chrome on an Android phone with Google Play Services for AR (ARCore). iPhones do not support it in the browser, so use Camera view there.');return}
- arui.style.display='block';
- const s=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['hit-test'],optionalFeatures:['dom-overlay'],domOverlay:{root:arui}});
- xrS=s;renderer.xr.enabled=true;renderer.xr.setReferenceSpaceType('local');await renderer.xr.setSession(s);
- xrSrc=await s.requestHitTestSource({space:await s.requestReferenceSpace('viewer')});
- studio(false);holder.visible=false;holder.position.set(0,0,0);arScale=.1;holder.scale.setScalar(arScale);mode='xr';
- s.addEventListener('select',()=>{if(reticle.visible){holder.position.setFromMatrixPosition(reticle.matrix);holder.visible=true;$('art').textContent='Placed. Tap another spot to move it, or use Smaller / Larger.'}});
- s.addEventListener('end',()=>{renderer.xr.enabled=false;xrSrc=null;xrS=null;reticle.visible=false;holder.visible=true;holder.position.set(0,0,0);holder.scale.setScalar(1);arui.style.display='none';studio(true);mode='3d'})
-}catch(err){arui.style.display='none';alert('AR could not start: '+(err&&err.message||err))}};
 const G=re=>parts.filter(p=>re.test(p.userData.name));
 const cr=G(/^Crankshaft/)[0],fw=G(/^Flywheel/)[0],cm=G(/^Camshaft/)[0];let th=Math.PI,run=true,last=0;const NM=['Intake','Compression','Power','Exhaust'];
 $('bRun').onclick=e=>{run=!run;e.target.textContent=run?'Stop engine':'Start engine';e.target.classList.toggle('on',run)};
