@@ -28,10 +28,10 @@ button:hover,button:focus-visible{border-color:var(--hot);outline:none}button.on
 #msg{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:var(--mu);font-size:14px}
 </style></head><body>
 <video id="cam" playsinline muted></video><canvas id="c"></canvas>
-<div class="top"><h1>Twin-cylinder <span>diesel engine</span></h1><div class="sub">Mechanical Engineering Lab, COEP Tech, Pune. Drag to rotate, pinch or scroll to zoom, tap a part to read about it.</div><div id="st" style="margin-top:10px;font:12px Consolas,monospace;color:var(--tx);line-height:1.6"></div></div>
+<div class="top"><h1>Twin-cylinder <span>diesel engine</span></h1><div class="sub">Mechanical Engineering Lab, COEP Tech, Pune. Drag to rotate, pinch to zoom, drag with two fingers (or press Move) to reposition, tap a part to read about it.</div><div id="st" style="margin-top:10px;font:12px Consolas,monospace;color:var(--tx);line-height:1.6"></div></div>
 <div id="name"></div><div id="msg">Loading 3D…</div>
 <div class="dock"><div class="r"><span style="font-size:12px;color:var(--mu)">Assembled</span><input id="ex" type="range" min="0" max="100" value="0" aria-label="Explode"><span style="font-size:12px;color:var(--mu)">Exploded</span></div>
-<div class="r" style="margin-top:8px;flex-wrap:wrap"><button id="bRun" class="on">Stop engine</button><input id="rpm" type="range" min="5" max="100" value="30" style="flex:none;width:120px" aria-label="Engine speed"><button id="bCut">Cut view</button><button id="bAR">AR: place on table</button><button id="bCam">Camera view</button><button id="bSp">Auto-spin</button><button id="bRe">Reset</button><button id="bIn">About engine</button></div>
+<div class="r" style="margin-top:8px;flex-wrap:wrap"><button id="bRun" class="on">Stop engine</button><input id="rpm" type="range" min="5" max="100" value="30" style="flex:none;width:120px" aria-label="Engine speed"><button id="bMv">Move: off</button><button id="bCut">Cut view</button><button id="bAR">AR: place on table</button><button id="bCam">Camera view</button><button id="bSp">Auto-spin</button><button id="bRe">Reset</button><button id="bIn">About engine</button></div>
 <div id="chips"></div></div>
 <svg id="ln" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;display:none"><defs><marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9z" fill="#c8501e"/></marker></defs><line id="l1" stroke="#c8501e" stroke-width="1.8" marker-end="url(#ar)"/></svg>
 <div id="co"><b id="ct"></b><p id="cd"></p></div><aside id="in" aria-label="About the engine"><button id="xIn" style="float:right">Close</button>
@@ -45,22 +45,22 @@ button:hover,button:focus-visible{border-color:var(--hot);outline:none}button.on
 <script>
 const $=id=>document.getElementById(id),clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
 const renderer=new THREE.WebGLRenderer({canvas:$('c'),antialias:true,alpha:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.outputEncoding=THREE.sRGBEncoding;renderer.toneMappingExposure=.9;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(40,1,.05,100),holder=new THREE.Group(),engine=new THREE.Group();
 scene.add(holder);holder.add(engine);
 const pm=new THREE.PMREMGenerator(renderer),es=new THREE.Scene();es.background=new THREE.Color(0x8e939c);
 [[0,6,0,8,.2,8,7],[6,2,3,.3,5,5,4],[-6,2,-3,.3,5,5,3],[0,1,-7,8,3,.3,2]].forEach(a=>{const m=new THREE.Mesh(new THREE.BoxGeometry(a[3],a[4],a[5]),new THREE.MeshBasicMaterial({color:new THREE.Color(1,1,1).multiplyScalar(a[6])}));m.position.set(a[0],a[1],a[2]);es.add(m)});
 scene.environment=pm.fromScene(es).texture;
-scene.add(new THREE.HemisphereLight(0xdfe9ff,0x40342a,.3));const sun=new THREE.DirectionalLight(0xffffff,1.5);sun.position.set(4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-8,right:8,top:8,bottom:-8,far:30});sun.shadow.bias=-.0004;scene.add(sun);
-const floor=new THREE.Mesh(new THREE.CircleGeometry(9,64),new THREE.MeshStandardMaterial({color:0xd8d4c9,metalness:0,roughness:.9}));floor.rotation.x=-Math.PI/2;floor.position.y=-1.5;floor.receiveShadow=true;scene.add(floor);
-const grid=new THREE.GridHelper(18,36,0xbdb8aa,0xcfcac0);grid.position.y=-1.49;scene.add(grid);
+scene.add(new THREE.HemisphereLight(0xdfe9ff,0x40342a,.3));const sun=new THREE.DirectionalLight(0xffffff,.8);sun.position.set(4,9,6);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-8,right:8,top:8,bottom:-8,far:30});sun.shadow.bias=-.0004;scene.add(sun);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(9,64),new THREE.MeshStandardMaterial({color:0xd8d4c9,metalness:0,roughness:.9}));floor.rotation.x=-Math.PI/2;floor.position.y=-1.5;floor.receiveShadow=true;0;
+const grid=new THREE.GridHelper(18,36,0xbdb8aa,0xcfcac0);grid.position.y=-1.49;0;
 const BG=new THREE.Color(0xe7e4dc);scene.background=BG;
 const M=(c,m,r)=>new THREE.MeshStandardMaterial({color:c,metalness:m,roughness:r});
 const K={steel:M(0xb4b9c0,.95,.28),iron:M(0x666a72,.85,.42),dark:M(0x141517,.55,.5),blue:M(0x1d5fd6,.4,.32),gold:M(0xe3a919,.85,.26),brass:M(0xa9743a,.85,.33)};
 const cy=(r,h,m,ax,x=0,y=0,z=0,s=40)=>{const o=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,s),m);if(ax==='x')o.rotation.z=Math.PI/2;if(ax==='z')o.rotation.x=Math.PI/2;o.position.set(x,y,z);return o};
 const bx=(w,h,d,m,x=0,y=0,z=0)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);return o};
 const parts=[];
-function prep(o){if(o.isMesh){o.material=o.material.clone();o.material.userData={e:o.material.emissive.getHex()};o.material.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <dithering_fragment>','#include <dithering_fragment>\nif(!gl_FrontFacing)gl_FragColor=vec4(.78,.36,.17,1.);')}}}
+function prep(o){if(o.isMesh){o.material=o.material.clone();o.material.userData={e:o.material.emissive.getHex()};o.material.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('#include <dithering_fragment>','#include <dithering_fragment>\nif(!gl_FrontFacing){float k=.4+.55*clamp(dot(normal,vec3(0.,0.,1.)),0.,1.);gl_FragColor=vec4(pow(diffuseColor.rgb*k,vec3(.4545)),1.);}')}}}
 function part(name,kids,pos,ex){const g=new THREE.Group();kids.forEach(k=>{g.add(k);k.traverse(prep)});
 g.position.set(...pos);g.userData={name,base:new THREE.Vector3(...pos),ex:new THREE.Vector3(...ex)};engine.add(g);parts.push(g)}
 // crankshaft axis = X, cylinders point up
@@ -99,20 +99,22 @@ const BOLT=[[/^Cylinder head/,[[-.38,.22,-.38],[.38,.22,-.38],[-.38,.22,.38],[.3
 parts.forEach(p=>{const b=BOLT.find(x=>x[0].test(p.userData.name));const add=m=>{m.userData.k=1;m.material=m.material.clone();m.material.userData={e:0};p.add(m)};
  if(b)b[1].forEach(q=>add(cy(.04,.05,K.steel,'y',q[0],q[1],q[2],6)));
  if(/^Crankcase/.test(p.userData.name))[-1.2,-.4,.4,1.2].forEach(x=>p.add(bx(.07,.8,.05,K.iron,x,0,.59)))});
-const COL=[[/Valve cover/,0xe0261c],[/Crankcase/,0x2c5ab5],[/Cylinder block/,0x56606e],[/Cylinder head/,0xb5bfcc],[/Rocker/,0xffb400],[/Injector/,0x14c26e],[/Pushrod/,0xff7a1a],[/Intake/,0xd9782a],[/Camshaft/,0x13bfd6],[/Flywheel/,0xd4302a],[/Sump/,0x24272d],[/Piston \d/,0xe6ebf2],[/Connecting/,0xa3adbb],[/Crankshaft/,0xf0f3f7],[/gasket/,0xa34710],[/Valves/,0xf4f6f9],[/springs/,0xffd23a],[/feet/,0x3a3f47],[/Air filter/,0x1560ff],[/Fuel injection/,0xffb400],[/Fuel lines/,0xd9a21b],[/Exhaust/,0x4a3a33]];
-parts.forEach(p=>{const c=COL.find(x=>x[0].test(p.userData.name));if(c)p.traverse(o=>{if(o.isMesh&&!o.userData.k){const m=o.material;m.color.setHex(c[1]);m.metalness=c[2];m.roughness=c[3];if(c[3]>=.45){m.bumpMap=nz;m.bumpScale=1.2}}})});
+const COL=[[/Valve cover/,0x8a5230,.45,.5],[/Crankcase/,0x676c75,.7,.36],[/Cylinder block/,0xe0980a,.45,.5],[/Cylinder head/,0x80858e,.7,.36],[/Rocker/,0xd9a41c,.45,.5],[/Injector/,0x26272a,.45,.5],[/Pushrod/,0xb4b8be,.7,.36],[/Intake/,0x7d828a,.7,.36],[/Camshaft/,0xd9a41c,.45,.5],[/Flywheel/,0x55585e,.55,.5],[/Sump/,0x151618,.45,.5],[/Piston \d/,0xaeb2b9,.7,.36],[/Connecting/,0x9fa3aa,.7,.36],[/Crankshaft/,0x8d929a,.7,.36],[/gasket/,0x17181a,.45,.5],[/Valves/,0xc4c7cc,.7,.36],[/springs/,0xc9ccd1,.7,.36],[/feet/,0x151618,.45,.5],[/Air filter/,0x0f3f9e,.45,.5],[/Fuel injection/,0xd9a41c,.45,.5],[/Fuel lines/,0x1a1a1c,.45,.5],[/Exhaust/,0x1b1b1d,.45,.5]];
+parts.forEach(p=>{const c=COL.find(x=>x[0].test(p.userData.name));if(c)p.traverse(o=>{if(o.isMesh&&!o.userData.k){const m=o.material;m.color.setHex(c[1]);m.metalness=c[2];m.roughness=c[3];m.envMapIntensity=.5}})});
 engine.traverse(o=>{if(o.isMesh)o.castShadow=o.receiveShadow=true});
 const INFO={'Fuel lines':'High-pressure pipes that carry fuel from the pump to each injector.','Sump (oil pan)':'Holds the engine oil that lubricates the crank, bearings and pistons.','Crankcase':'The strong housing that carries the crankshaft and bearings and keeps the moving parts enclosed.','Mounting feet':'Bolt the engine to its bed and soak up vibration.','Crankshaft':'Turns the up-and-down push of the pistons into rotation. The two throws are set so the cylinders fire evenly.','Flywheel':'A heavy disc that stores energy between power strokes and keeps the engine turning smoothly.','Camshaft':'Its lobes lift the pushrods at the right moment, in step with the crankshaft, which turns it at half speed.','Fuel injection pump':'Pressurises the fuel and times its delivery to each injector.','Intake manifold':'Carries clean air from the filters to the cylinders.','Cylinder block':'The bore the piston slides in. Cooling takes heat away from it.','Piston':'Compresses the air, then is pushed down by the burning fuel. This is where the engine\'s power starts.','Piston rings':'Seal the gas in, spread oil on the wall and pass heat from the piston to the cylinder.','Connecting rod':'Links the piston to the crankshaft and carries the push between them.','Head gasket':'A thin seal between block and head that stops gas, oil and coolant leaking.','Cylinder head':'Closes the top of the cylinder and holds the valves and injector. The combustion chamber is formed here.','Valves':'The inlet valve lets air in; the exhaust valve lets burnt gas out.','Valve springs':'Snap the valves shut after the rocker arm lets go.','Rocker arms':'Rock on a pivot to turn the pushrod\'s lift into a push on the valve.','Pushrod':'Passes the cam lift from the camshaft up to the rocker arm.','Injector':'Sprays a fine mist of fuel into the hot compressed air, which ignites it. A diesel has no spark plug.','Valve cover':'Keeps oil in and dirt out of the valve gear.','Air filter':'Cleans the air before it enters the engine; dirty air wears the cylinders quickly.'};
 const key=n=>n.replace(/ \d$/,'');Object.assign(INFO,{'Fuel lines':'High-pressure pipes that carry fuel from the pump to each injector.','Exhaust manifold':'Collects burnt gas from both cylinders and leads it out of the engine.'});
 let yaw=.8,pit=.3,dist=12,auto=false,t=0,cur=0,mode='3d',tgt=new THREE.Vector3(0,1.6,0);
+const pan=new THREE.Vector3(0,-.9,0);let moveOn=false;
+function panBy(dx,dy){const m=cam.matrixWorld.elements,k=dist*.0011;pan.x+=-m[0]*dx*k+m[4]*dy*k;pan.y+=-m[1]*dx*k+m[5]*dy*k;pan.z+=-m[2]*dx*k+m[6]*dy*k}
 function place(){cam.position.set(tgt.x+dist*Math.sin(yaw)*Math.cos(pit),tgt.y+dist*Math.sin(pit),tgt.z+dist*Math.cos(yaw)*Math.cos(pit));cam.lookAt(tgt)}
 function size(){renderer.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
 addEventListener('resize',size);size();
 const ptr=new Map(),cv=$('c');let pd=1,mv=0;const pinch=()=>{const p=[...ptr.values()];return p.length<2?1:Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1])};
 cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);ptr.set(e.pointerId,[e.clientX,e.clientY]);mv=0;pd=pinch()};
 cv.onpointermove=e=>{const o=ptr.get(e.pointerId);if(!o)return;ptr.set(e.pointerId,[e.clientX,e.clientY]);
- if(ptr.size==1){yaw-=(e.clientX-o[0])*.008;pit=clamp(pit+(e.clientY-o[1])*.008,-.1,1.45);mv+=Math.abs(e.clientX-o[0])+Math.abs(e.clientY-o[1]);auto=false;$('bSp').classList.remove('on')}
- else if(ptr.size==2){const d=pinch();dist=clamp(dist*pd/d,4,24);pd=d;mv=99}};
+ if(ptr.size==1&&(moveOn||e.shiftKey||e.buttons===2)){panBy(e.clientX-o[0],e.clientY-o[1]);mv+=9}else if(ptr.size==1){yaw-=(e.clientX-o[0])*.008;pit=clamp(pit+(e.clientY-o[1])*.008,-.1,1.45);mv+=Math.abs(e.clientX-o[0])+Math.abs(e.clientY-o[1]);auto=false;$('bSp').classList.remove('on')}
+ else if(ptr.size==2){const d=pinch();dist=clamp(dist*pd/d,4,24);pd=d;mv=99;panBy((e.clientX-o[0])/2,(e.clientY-o[1])/2)}};
 cv.onpointerup=e=>{if(ptr.size==1&&mv<6)tap(e);ptr.delete(e.pointerId)};cv.onpointercancel=e=>ptr.delete(e.pointerId);
 cv.addEventListener('wheel',e=>{e.preventDefault();dist=clamp(dist*(1+e.deltaY*.001),4,24)},{passive:false});
 let sel=null;const rc=new THREE.Raycaster();
@@ -126,21 +128,32 @@ $('ex').oninput=e=>t=e.target.value/100;
 renderer.localClippingEnabled=true;const plane=new THREE.Plane(new THREE.Vector3(0,0,-1),0);let cut=false;
 $('bCut').onclick=e=>{cut=!cut;e.target.classList.toggle('on',cut);if(cut){yaw=.4;pit=.12;auto=false;$('bSp').classList.remove('on')}
  parts.forEach(p=>p.traverse(o=>{if(o.isMesh){o.material.clippingPlanes=cut?[plane]:null;o.material.side=cut?THREE.DoubleSide:THREE.FrontSide;o.material.needsUpdate=true}}))};
+const cap=document.createElement('div');cap.textContent='Cut view: the engine is sliced in half lengthways so you can see inside. The darker, shaded surfaces are the inside of the cut parts, each in its own colour. Watch the pistons, rods and valves move.';
+cap.style.cssText='position:fixed;right:16px;top:70px;width:230px;display:none;font:12.5px/1.45 system-ui,sans-serif;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--hot);padding:8px 10px;z-index:2;pointer-events:none';document.body.appendChild(cap);
+$('bCut').addEventListener('click',()=>{cap.style.display=document.querySelector('#bCut.on')?'block':'none'});
+$('bMv').onclick=e=>{moveOn=!moveOn;e.target.classList.toggle('on',moveOn);e.target.textContent=moveOn?'Move: on':'Move: off'};cv.oncontextmenu=e=>e.preventDefault();
 $('bIn').onclick=()=>$('in').classList.add('open');$('xIn').onclick=()=>$('in').classList.remove('open');
 $('bSp').onclick=e=>{auto=!auto;e.target.classList.toggle('on',auto)};
-$('bRe').onclick=()=>{yaw=.8;pit=.3;dist=12;t=0;$('ex').value=0;pick(null)};
+$('bRe').onclick=()=>{pan.set(0,-.9,0);yaw=.8;pit=.3;dist=12;t=0;$('ex').value=0;pick(null)};
 const vid=$('cam'),studio=on=>{scene.background=on?BG:null;floor.visible=grid.visible=on};
 $('bCam').onclick=async e=>{if(mode==='cam'){vid.srcObject.getTracks().forEach(k=>k.stop());vid.style.display='none';studio(true);holder.scale.setScalar(1);mode='3d';e.target.classList.remove('on');return}
  try{vid.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});await vid.play();vid.style.display='block';studio(false);holder.scale.setScalar(.8);mode='cam';e.target.classList.add('on')}catch(err){alert('Camera blocked. Allow camera access and open this page over https.')}};
 // WebXR table AR (Android Chrome with ARCore)
 let xrSrc=null;const reticle=new THREE.Mesh(new THREE.RingGeometry(.12,.16,32).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({color:0xff7a1a}));reticle.matrixAutoUpdate=false;reticle.visible=false;scene.add(reticle);
-$('bAR').onclick=async()=>{if(!navigator.xr||!await navigator.xr.isSessionSupported('immersive-ar').catch(()=>false)){alert('Table AR needs Chrome on an ARCore Android phone. On iPhone use “Camera view”.');return}
- const s=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['hit-test'],optionalFeatures:['dom-overlay'],domOverlay:{root:document.body}});
- renderer.xr.enabled=true;renderer.xr.setReferenceSpaceType('local');await renderer.xr.setSession(s);
+const arui=document.createElement('div');arui.innerHTML='<div id="art" style="margin-bottom:8px">Move your phone slowly over a flat surface, then tap the ring to place the engine.</div><button id="a1">Smaller</button> <button id="a2">Larger</button> <button id="a3">Exit AR</button>';
+arui.style.cssText='position:fixed;left:0;right:0;bottom:0;padding:14px;display:none;text-align:center;color:#fff;font:14px system-ui,sans-serif;background:linear-gradient(transparent,rgba(0,0,0,.65))';document.body.appendChild(arui);
+arui.addEventListener('beforexrselect',e=>e.preventDefault());let xrS=null,arScale=.1;
+$('a1').onclick=()=>{arScale*=.8;holder.scale.setScalar(arScale)};$('a2').onclick=()=>{arScale*=1.25;holder.scale.setScalar(arScale)};$('a3').onclick=()=>xrS&&xrS.end();
+$('bAR').onclick=async()=>{try{
+ if(!navigator.xr||!await navigator.xr.isSessionSupported('immersive-ar')){alert('Table AR needs Chrome on an Android phone with Google Play Services for AR (ARCore). iPhones do not support it in the browser, so use Camera view there.');return}
+ arui.style.display='block';
+ const s=await navigator.xr.requestSession('immersive-ar',{requiredFeatures:['hit-test'],optionalFeatures:['dom-overlay'],domOverlay:{root:arui}});
+ xrS=s;renderer.xr.enabled=true;renderer.xr.setReferenceSpaceType('local');await renderer.xr.setSession(s);
  xrSrc=await s.requestHitTestSource({space:await s.requestReferenceSpace('viewer')});
- studio(false);holder.visible=false;holder.scale.setScalar(.11);mode='xr';
- s.addEventListener('select',()=>{if(reticle.visible){holder.position.setFromMatrixPosition(reticle.matrix);holder.visible=true}});
- s.addEventListener('end',()=>{renderer.xr.enabled=false;xrSrc=null;reticle.visible=false;holder.visible=true;holder.position.set(0,0,0);holder.scale.setScalar(1);studio(true);mode='3d'})};
+ studio(false);holder.visible=false;holder.position.set(0,0,0);arScale=.1;holder.scale.setScalar(arScale);mode='xr';
+ s.addEventListener('select',()=>{if(reticle.visible){holder.position.setFromMatrixPosition(reticle.matrix);holder.visible=true;$('art').textContent='Placed. Tap another spot to move it, or use Smaller / Larger.'}});
+ s.addEventListener('end',()=>{renderer.xr.enabled=false;xrSrc=null;xrS=null;reticle.visible=false;holder.visible=true;holder.position.set(0,0,0);holder.scale.setScalar(1);arui.style.display='none';studio(true);mode='3d'})
+}catch(err){arui.style.display='none';alert('AR could not start: '+(err&&err.message||err))}};
 const G=re=>parts.filter(p=>re.test(p.userData.name));
 const cr=G(/^Crankshaft/)[0],fw=G(/^Flywheel/)[0],cm=G(/^Camshaft/)[0];let th=Math.PI,run=true,last=0;const NM=['Intake','Compression','Power','Exhaust'];
 $('bRun').onclick=e=>{run=!run;e.target.textContent=run?'Stop engine':'Start engine';e.target.classList.toggle('on',run)};
@@ -155,6 +168,6 @@ function callout(){if(!sel)return;const b=new THREE.Box3().setFromObject(sel).ge
  co.style.left=bxx+'px';co.style.top=byy+'px';const l=$('l1');l.setAttribute('x1',x<innerWidth/2?bxx:bxx+w);l.setAttribute('y1',byy+h/2);l.setAttribute('x2',x);l.setAttribute('y2',y)}
 renderer.setAnimationLoop((ts,frame)=>{cur+=(t-cur)*.12;parts.forEach(p=>p.position.copy(p.userData.base).addScaledVector(p.userData.ex,cur));motion(ts);
  if(mode==='xr'){if(auto)engine.rotation.y+=.004;if(frame&&xrSrc){const h=frame.getHitTestResults(xrSrc);if(h.length){reticle.visible=true;reticle.matrix.fromArray(h[0].getPose(renderer.xr.getReferenceSpace()).transformation.matrix)}else reticle.visible=false}}
- else{if(auto&&!ptr.size)yaw+=.004;tgt.y=1.6+cur*1.3;place();callout()}
+ else{if(auto&&!ptr.size)yaw+=.004;tgt.set(pan.x,1.6+cur*1.3+pan.y,pan.z);place();callout()}
  renderer.render(scene,cam);$('msg').style.display='none'});
 </script></body></html>
